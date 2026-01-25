@@ -300,8 +300,6 @@
                 <button id="request-info-btn" class="btn" type="button">Solicitar información</button>
             </div>
 
-            <p id="server-status" style="font-size: 13px; color: var(--text-dim); margin-top: 8px;"></p>
-
             <!-- Request Info Modal -->
             <div id="request-info-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="request-info-title">
                 <div class="modal-overlay" data-close></div>
@@ -359,13 +357,6 @@
                         openAppBtn.disabled = false;
                         openAppBtn.textContent = 'Acceder a la app';
                         openAppBtn.onclick = () => window.location.href = APP_URL;
-                        
-                        if (statusText) {
-                            const version = data.version || '?';
-                            const buildNumber = data.buildNumber || '?';
-                            statusText.textContent = `✓ Servidor online | v${version} #${buildNumber}`;
-                            statusText.style.color = '#4ade80'; // green
-                        }
                     } else {
                         throw new Error(`Health check failed with status ${res.status}`);
                     }
@@ -374,10 +365,6 @@
                     isServerOnline = false;
                     openAppBtn.disabled = true;
                     openAppBtn.textContent = 'Acceder a la app';
-                    
-                    if (statusText) {
-                        statusText.textContent = '';
-                    }
 
                     // Retry after 30 seconds
                     setTimeout(checkServerHealth, 30000);
