@@ -368,11 +368,10 @@
                 } catch (err) {
                     console.warn('[Health Check] Server offline:', err.message);
                     openAppBtn.disabled = true;
-                    openAppBtn.textContent = 'Servidor no disponible';
+                    openAppBtn.textContent = 'Acceder a la app';
                     
                     if (statusText) {
-                        statusText.textContent = '⚠ El servidor está temporalmente offline';
-                        statusText.style.color = 'var(--accent)';
+                        statusText.textContent = '';
                     }
 
                     // Retry after 30 seconds
