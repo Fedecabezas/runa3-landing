@@ -316,7 +316,7 @@
                         <input id="ri-email" name="email" type="email" required placeholder="Correo" aria-label="Correo" autocomplete="email" />
 
                         <div class="modal-actions">
-                            <button type="submit" class="btn" style="min-width:110px;">Enviar</button>
+                            <button id="submit-waitlist-btn" type="submit" class="btn" style="min-width:110px;">Enviar</button>
                         </div>
 
                         <p id="request-info-feedback" style="display:none;margin-top:10px;color:var(--text-main);text-align:center;"></p>
@@ -373,11 +373,10 @@
                     console.warn('[Health Check] Server offline:', err.message);
                     isServerOnline = false;
                     openAppBtn.disabled = true;
-                    openAppBtn.textContent = 'Servidor no disponible';
+                    openAppBtn.textContent = 'Acceder a la app';
                     
                     if (statusText) {
-                        statusText.textContent = '⚠ El servidor está temporalmente offline';
-                        statusText.style.color = 'var(--accent)';
+                        statusText.textContent = '';
                     }
 
                     // Retry after 30 seconds
@@ -396,11 +395,18 @@
             const closeEls = modal ? modal.querySelectorAll('[data-close]') : [];
             const form = document.getElementById('request-info-form');
             const feedback = document.getElementById('request-info-feedback');
+            const submitBtn = document.getElementById('submit-waitlist-btn');
 
             function openModal(){
                 if(!modal) return;
                 modal.setAttribute('aria-hidden','false');
                 document.body.style.overflow = 'hidden';
+                
+                // Disable submit if server offline
+                if (submitBtn) {
+                    submitBtn.disabled = !isServerOnline;
+                }
+                
                 const nameInput = document.getElementById('ri-name');
                 if (nameInput && typeof nameInput.focus === 'function') {
                     nameInput.focus();
@@ -422,11 +428,8 @@
                 e.preventDefault();
                 if(!form) return;
                 
-                // Check if server is online
+                // Silent check - no message
                 if (!isServerOnline) {
-                    feedback.style.display = 'block'; 
-                    feedback.style.color = 'var(--accent)'; 
-                    feedback.textContent = 'El servidor no está disponible. Intentá más tarde.'; 
                     return;
                 }
                 
