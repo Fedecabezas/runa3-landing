@@ -296,8 +296,8 @@
             </div>
 
             <div class="actions">
-                <button id="open-app-btn" class="btn" type="button" disabled>Verificando servidor...</button>
-                <button id="request-info-btn" class="btn" type="button">Solicitar información</button>
+                <button id="open-app-btn" class="btn" type="button" disabled aria-label="Acceder a la aplicación">Verificando servidor...</button>
+                <button id="request-info-btn" class="btn" type="button" aria-label="Solicitar información de acceso">Solicitar información</button>
             </div>
 
             <!-- Request Info Modal -->
@@ -314,7 +314,7 @@
                         <input id="ri-email" name="email" type="email" required placeholder="Correo" aria-label="Correo" autocomplete="email" />
 
                         <div class="modal-actions">
-                            <button id="submit-waitlist-btn" type="submit" class="btn" style="min-width:110px;">Enviar</button>
+                            <button id="submit-waitlist-btn" type="submit" class="btn" style="min-width:110px;" aria-label="Enviar solicitud">Enviar</button>
                         </div>
 
                         <p id="request-info-feedback" style="display:none;margin-top:10px;color:var(--text-main);text-align:center;"></p>
@@ -324,7 +324,7 @@
 
         </div>
 
-        <footer>EMBRAGUE CORP © 2026</footer>
+        <footer>EMBRAGUE LABS © 2026</footer>
     </div>
     <script>
         // Global server status
