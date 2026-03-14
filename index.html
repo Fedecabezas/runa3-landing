@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+    <script src="./config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Runa3 - Science Health</title>
@@ -334,8 +335,8 @@
         (function(){
             const openAppBtn = document.getElementById('open-app-btn');
             const statusText = document.getElementById('server-status');
-            const APP_URL = 'https://app.runa3.fit';
-            const HEALTH_URL = 'https://api.runa3.fit/api/v1/health';
+              const APP_URL = window.APP_CONFIG?.APP_URL || 'https://app.runa3.fit';
+              const HEALTH_URL = (window.APP_CONFIG?.API_URL || 'https://api.runa3.fit/api/v1') + '/health';
 
             async function checkServerHealth() {
                 try {
@@ -438,7 +439,8 @@
                     if (submitButton) { submitButton.textContent = 'Enviando...'; }
 
                     // Try the Cloudflare tunnel API host first (production), then local relative, then fallback
-                    const API_HOSTS = [ 'https://api.runa3.fit', '', 'https://runa3.fit' ];
+                    const configHost = window.APP_CONFIG?.API_URL?.replace('/api/v1', '');
+                    const API_HOSTS = [ configHost || 'https://api.runa3.fit', '', 'https://runa3.fit' ];
                     let res = null;
                     let lastError = null;
                     let triedHost = null;
