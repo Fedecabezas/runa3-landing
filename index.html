@@ -2,538 +2,363 @@
 <html lang="es">
 
 <head>
-    <script src="./config.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./config.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0D0D0D">
     <title>Runa3 - Science Health</title>
-
-    <!-- Inmersión total: Modo App / Standalone -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Plataforma de alto rendimiento: ciencia, salud, fuerza, nutrición y entrenamiento.">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/icon-splash.png">
     <link rel="apple-touch-icon" href="/icon-splash.png">
-    <!-- Google Fonts: Outfit (moderno y premium) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!--
+      La cara de la app (dev-runa-client, tema web-oscuro): negro profundo, cobre
+      como único color de acción, Inter para el texto, JetBrains Mono para las
+      etiquetas, el ruido de la barra lateral y tarjetas con borde izquierdo.
+      No hay botón a la app: está cerrada y se entra solo con el link de primer
+      acceso que manda el equipo (runa3.fit/sign, AUT-31).
+    -->
     <style>
         :root {
-            --bg: #050505;
-            --text-main: #f5f5f7;
-            --text-dim: #86868b;
-            --accent: #58a6ff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
+            --surface-base: #0D0D0D;
+            --surface-raised: #1A1A1A;
+            --text-primary: #F5F5F5;
+            --text-secondary: #A3A3A3;
+            --text-tertiary: #737373;
+            --accent: #C97C5D;
+            --accent-hover: #E8956F;
+            --accent-surface: #1F1714;
+            --border-subtle: #333333;
+            --border-default: #404040;
+            --mono: 'JetBrains Mono', ui-monospace, monospace;
+            --ruido: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            background-color: var(--bg);
-        }
+        html, body { min-height: 100%; background-color: var(--surface-base); }
 
         body {
-            color: var(--text-main);
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-font-smoothing: antialiased;
-            overflow-y: auto;
-            display: block;
-            /* Restauramos el comportamiento natural para pull-to-refresh y auto-ocultar barras */
-            overscroll-behavior-y: auto;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201, 124, 93, 0.10) 0%, rgba(13, 13, 13, 0) 70%),
+                var(--surface-base);
         }
 
-        /* Ocultar scrollbar para máxima limpieza visual */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        body {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        /* El ruido de la app, sobre toda la página */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: var(--ruido);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .page-wrapper {
+            position: relative;
+            z-index: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 101dvh;
-            /* Forzamos un poco más de altura para que Chrome oculte la barra al bajar */
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        /* Efecto sutil de gradiente de fondo */
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
-            z-index: -1;
+            min-height: 100dvh;
+            padding: 24px 16px;
         }
 
         .container {
-            max-width: 600px;
+            flex: 1;
             width: 100%;
-            text-align: center;
-            padding: 0;
-            animation: fadeInEntrance 2s cubic-bezier(0.16, 1, 0.3, 1);
-            flex-grow: 1;
+            max-width: 640px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            animation: entrada 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeInEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-                filter: blur(8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-                filter: blur(0);
-            }
+        @keyframes entrada {
+            from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+            to   { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
 
-        .logo {
-            font-size: 24px;
-            letter-spacing: 12px;
-            text-transform: uppercase;
-            font-weight: 300;
-            /* Más fina para que luzca estilizada al ser más grande */
-            margin-bottom: 60px;
-            color: var(--accent);
-            position: relative;
-            cursor: default;
+        .marca { display: flex; align-items: baseline; gap: 14px; margin-bottom: 56px; }
+        .marca .nombre { font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+        .marca .sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--text-tertiary);
         }
 
         h1 {
-            font-size: clamp(40px, 10vw, 72px);
-            font-weight: 600;
-            letter-spacing: -3px;
-            margin-bottom: 24px;
-            line-height: 0.95;
-            color: #fff;
+            font-size: clamp(36px, 8vw, 60px);
+            font-weight: 300;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+        h1 .cobre { color: var(--accent); }
+
+        .rotulo {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 36px;
         }
 
         .tagline {
+            color: var(--text-secondary);
             font-size: 16px;
-            color: var(--text-dim);
-            line-height: 1.5;
-            margin-bottom: 30px;
             font-weight: 300;
+            line-height: 1.7;
+            max-width: 520px;
+            margin-bottom: 32px;
         }
 
-        .status-box {
-            background: rgba(255, 255, 255, 0.02);
+        /* Tarjeta como las alertas del panel: ruido, borde fino y borde izquierdo de color */
+        .tarjeta {
+            background-image: var(--ruido), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0) 100%);
+            background-color: rgba(26, 26, 26, 0.6);
+            border: 1px solid var(--border-subtle);
             border-left: 2px solid var(--accent);
-            padding: 20px 30px;
-            margin-bottom: 40px;
-            text-align: left;
-            max-width: 450px;
+            padding: 20px 22px;
+            margin-bottom: 32px;
+            max-width: 520px;
         }
-
-        .status-box p {
-            font-size: 13px;
-            color: var(--text-dim);
-            margin-bottom: 4px;
-        }
-
-        .status-box .highlight {
-            color: var(--text-main);
-            font-weight: 400;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: var(--text-main);
-            color: var(--bg);
-            padding: 14px 28px;
-            text-decoration: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            font-family: inherit; /* Ensure button inherits the 'Outfit' font */
-            cursor: pointer;
-        }
-
-        .btn.secondary {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 12px 22px;
-            border-radius: 26px;
-            font-weight: 600;
-        }
-
-        /* Layout for actions: slightly more space between buttons and center */
-        .actions { display:flex; gap: 12px; justify-content:center; align-items:center; margin-bottom: 10px; }
-
-        .btn:hover {
-            transform: scale(1.03);
-            background-color: #fff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        }
-
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn:disabled:hover {
-            transform: none;
-            background-color: var(--text-main);
-            box-shadow: none;
-        }
-
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .modal[aria-hidden="false"] {
-            display: flex;
-        }
-
-        .modal-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(6px);
-        }
-
-        .modal-panel {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 360px; /* compact */
-            background: rgba(10,10,10,0.9);
-            border: 1px solid var(--border);
-            padding: 16px; /* slightly tighter */
-            border-radius: 12px;
-            box-shadow: 0 10px 36px rgba(0,0,0,0.5);
-            color: var(--text-main);
-        }
-
-        .modal-panel h3 { margin-top: 0; margin-bottom: 6px; }
-        .modal-panel input { width: 100%; max-width: 220px; margin: 6px auto 12px auto; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--text-main) !important; }
-
-        /* Ensure autofill doesn't hide text: force text color and background overlay (WebKit + Gecko) */
-        .modal-panel input:-webkit-autofill,
-        .modal-panel input:-webkit-autofill:hover,
-        .modal-panel input:-webkit-autofill:focus {
-            -webkit-text-fill-color: var(--text-main) !important;
-            -webkit-box-shadow: 0 0 0px 1000px #151515 inset !important;
-            box-shadow: 0 0 0px 1000px #151515 inset !important;
-            background-clip: padding-box !important;
-        }
-
-        .modal-panel input:-moz-autofill,
-        .modal-panel input:-moz-autofill:hover,
-        .modal-panel input:-moz-autofill:focus {
-            color: var(--text-main) !important;
-            box-shadow: 0 0 0px 1000px #151515 inset !important;
-        }
-
-        .modal-panel label { display:block; margin-top: 8px; color:var(--text-dim); font-size:0.9rem; }
-        .modal-close { position: absolute; right: 12px; top: 8px; background: transparent; border: none; font-size: 22px; color: var(--text-dim); }
-        .modal-actions { display:flex; gap: 8px; justify-content:center; margin-top: 12px; }
-
-        footer {
-            margin-top: 40px;
-            width: 100%;
-            text-align: center;
-            font-size: 9px;
-            color: var(--text-dim);
-            opacity: 0.25;
-            /* Casi invisible */
+        .tarjeta .titulo {
+            font-family: var(--mono);
+            font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            flex-shrink: 0;
-            padding-bottom: 20px;
-            font-weight: 300;
+            color: var(--accent);
+            margin-bottom: 8px;
         }
+        .tarjeta .titulo b {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: var(--accent-surface);
+        }
+        .tarjeta p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            background: transparent;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: var(--mono);
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .btn:hover { background: var(--accent-surface); border-color: var(--accent-hover); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn:disabled:hover { background: transparent; border-color: var(--accent); }
+        .acciones { display: flex; }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+            padding-top: 32px;
+        }
+
+        /* Solicitar información */
+        .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 10; padding: 16px; }
+        .modal[aria-hidden="false"] { display: flex; }
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); }
+        .modal-panel {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            background-image: var(--ruido);
+            background-color: var(--surface-raised);
+            border: 1px solid var(--border-default);
+            border-left: 2px solid var(--accent);
+            padding: 24px;
+        }
+        .modal-panel h3 {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .modal-panel .bajada { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .modal-panel label {
+            display: block;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 6px;
+        }
+        .modal-panel input {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            background: var(--surface-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font: inherit;
+            font-size: 15px;
+        }
+        .modal-panel input:focus { outline: none; border-color: var(--accent); }
+        .modal-panel input:-webkit-autofill {
+            -webkit-text-fill-color: var(--text-primary);
+            -webkit-box-shadow: 0 0 0 1000px var(--surface-base) inset;
+        }
+        .modal-close {
+            position: absolute;
+            right: 12px;
+            top: 8px;
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; }
+        #request-info-feedback { margin-top: 14px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+        #request-info-feedback.error { color: var(--accent-hover); }
     </style>
 </head>
 
 <body>
     <div class="page-wrapper">
-        <div class="container">
-            <div class="logo">RUNA3 PLATFORM</div>
-            <h1>Science Health<br>Strength Nutrition Training</h1>
+        <main class="container">
+            <div class="marca"><span class="nombre">RUNA3</span><span class="sub">PLATFORM</span></div>
+
+            <h1>Science <span class="cobre">Health</span></h1>
+            <p class="rotulo">Strength · Nutrition · Training</p>
+
             <p class="tagline">Estamos lanzando nuestra plataforma de alto rendimiento. El acceso inicial está reservado
                 exclusivamente para clientes seleccionados.</p>
 
-            <div class="status-box">
-                <p>Estado del registro: <span class="highlight">Cerrado</span></p>
-                <p>Actualmente no aceptamos nuevas solicitudes.</p>
-                <p>La plataforma se encuentra en pruebas con acceso limitado.</p>
+            <section class="tarjeta" aria-label="Estado del registro">
+                <p class="titulo">Registro <b>Cerrado</b></p>
+                <p>La plataforma está en pruebas con acceso limitado. Se entra por invitación de nuestro equipo.</p>
+            </section>
+
+            <div class="acciones">
+                <button id="request-info-btn" class="btn" type="button">Solicitar información <span aria-hidden="true">→</span></button>
             </div>
-
-            <div class="actions">
-                <button id="request-info-btn" class="btn" type="button" aria-label="Solicitar información de acceso">Solicitar información</button>
-            </div>
-
-            <!-- Request Info Modal -->
-            <div id="request-info-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="request-info-title">
-                <div class="modal-overlay" data-close></div>
-                <div class="modal-panel">
-                    <button class="modal-close" aria-label="Cerrar" data-close>&times;</button>
-                    <h3 id="request-info-title">Solicitar información</h3>
-                    <p style="color:var(--text-dim);font-size:0.95rem;margin-top:6px;">Te contactaremos si el acceso está disponible.</p>
-                    <br/>
-                    <form id="request-info-form">
-                        <input id="ri-name" name="name" type="text" required minlength="2" placeholder="Nombre" aria-label="Nombre" autocomplete="name" />
-
-                        <input id="ri-email" name="email" type="email" required placeholder="Correo" aria-label="Correo" autocomplete="email" />
-
-                        <div class="modal-actions">
-                            <button id="submit-waitlist-btn" type="submit" class="btn" style="min-width:110px;" aria-label="Enviar solicitud">Enviar</button>
-                        </div>
-
-                        <p id="request-info-feedback" style="display:none;margin-top:10px;color:var(--text-main);text-align:center;"></p>
-                    </form>
-                </div>
-            </div>
-
-        </div>
+        </main>
 
         <footer>EMBRAGUE LABS © 2026</footer>
     </div>
+
+    <div id="request-info-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="request-info-title">
+        <div class="modal-overlay" data-close></div>
+        <div class="modal-panel">
+            <button class="modal-close" type="button" aria-label="Cerrar" data-close>&times;</button>
+            <h3 id="request-info-title">Solicitar información</h3>
+            <p class="bajada">Dejanos tu nombre y tu correo. Te escribimos cuando haya lugar.</p>
+            <form id="request-info-form" novalidate>
+                <label for="ri-name">Nombre</label>
+                <input id="ri-name" name="name" type="text" required minlength="2" maxlength="100" autocomplete="name">
+                <label for="ri-email">Correo</label>
+                <input id="ri-email" name="email" type="email" required autocomplete="email">
+                <div class="modal-actions">
+                    <button id="submit-waitlist-btn" type="submit" class="btn">Enviar</button>
+                </div>
+                <p id="request-info-feedback" hidden></p>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Global server status
-        let isServerOnline = false;
+        (function () {
+            var API_URL = (window.APP_CONFIG && window.APP_CONFIG.API_URL) || 'https://api.runa3.fit/api/v1';
+            var btn = document.getElementById('request-info-btn');
+            var modal = document.getElementById('request-info-modal');
+            var form = document.getElementById('request-info-form');
+            var feedback = document.getElementById('request-info-feedback');
+            var enviar = document.getElementById('submit-waitlist-btn');
 
-        // Health Check Logic: solo habilita el envío de "Solicitar información".
-        // El botón "Acceder a la app" se fue (AUT-31): la app está cerrada y se
-        // entra únicamente con el link de primer acceso que manda el equipo.
-        (function(){
-              const HEALTH_URL = (window.APP_CONFIG?.API_URL || 'https://api.runa3.fit/api/v1') + '/health';
-
-            async function checkServerHealth() {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
-
-                    const res = await fetch(HEALTH_URL, {
-                        method: 'GET',
-                        mode: 'cors',
-                        signal: controller.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (res.ok) {
-                        isServerOnline = true;
-                    } else {
-                        throw new Error(`Health check failed with status ${res.status}`);
-                    }
-                } catch (err) {
-                    console.warn('[Health Check] Server offline:', err.message);
-                    isServerOnline = false;
-
-                    // Retry after 30 seconds
-                    setTimeout(checkServerHealth, 30000);
-                }
+            function avisar(texto, esError) {
+                feedback.hidden = false;
+                feedback.textContent = texto;
+                feedback.className = esError ? 'error' : '';
             }
 
-            // Run health check on page load
-            checkServerHealth();
-        })();
-
-        // Request Info Modal logic
-        (function(){
-            const btn = document.getElementById('request-info-btn');
-            const modal = document.getElementById('request-info-modal');
-            const closeEls = modal ? modal.querySelectorAll('[data-close]') : [];
-            const form = document.getElementById('request-info-form');
-            const feedback = document.getElementById('request-info-feedback');
-            const submitBtn = document.getElementById('submit-waitlist-btn');
-
-            function openModal(){
-                if(!modal) return;
-                modal.setAttribute('aria-hidden','false');
+            function abrir() {
+                modal.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
-                
-                // Disable submit if server offline
-                if (submitBtn) {
-                    submitBtn.disabled = !isServerOnline;
-                }
-                
-                const nameInput = document.getElementById('ri-name');
-                if (nameInput && typeof nameInput.focus === 'function') {
-                    nameInput.focus();
-                }
+                document.getElementById('ri-name').focus();
             }
 
-            function closeModal(){
-                if(!modal) return;
-                modal.setAttribute('aria-hidden','true');
+            function cerrar() {
+                modal.setAttribute('aria-hidden', 'true');
                 document.body.style.overflow = '';
-                if (feedback) { feedback.style.display = 'none'; feedback.textContent = ''; }
-                if (form && typeof form.reset === 'function') { form.reset(); }
+                feedback.hidden = true;
+                form.reset();
+                form.querySelectorAll('input').forEach(function (i) { i.disabled = false; });
+                enviar.disabled = false;
+                enviar.textContent = 'Enviar';
             }
 
-            btn?.addEventListener('click', openModal);
-            closeEls.forEach(el => el.addEventListener('click', closeModal));
+            btn.addEventListener('click', abrir);
+            modal.querySelectorAll('[data-close]').forEach(function (el) { el.addEventListener('click', cerrar); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') cerrar();
+            });
 
-            form?.addEventListener('submit', async function(e){
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                if(!form) return;
-                
-                // Silent check - no message
-                if (!isServerOnline) {
-                    return;
-                }
-                
-                const name = (document.getElementById('ri-name') && (document.getElementById('ri-name').value || '')).trim();
-                const email = (document.getElementById('ri-email') && (document.getElementById('ri-email').value || '')).trim();
+                var name = document.getElementById('ri-name').value.trim();
+                var email = document.getElementById('ri-email').value.trim();
+                if (name.length < 2) return avisar('Escribí tu nombre.', true);
+                if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return avisar('Ese correo no parece válido.', true);
 
-                if(name.length < 2){
-                    feedback.style.display = 'block'; feedback.style.color = 'var(--accent)'; feedback.textContent = 'Por favor ingresa tu nombre.'; return;
-                }
-                if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-                    feedback.style.display = 'block'; feedback.style.color = 'var(--accent)'; feedback.textContent = 'Por favor ingresa un email válido.'; return;
-                }
-
-                try{
-                    const submitButton = form.querySelector('button[type="submit"]');
-                    if (submitButton && 'disabled' in submitButton) {
-                        submitButton.disabled = true;
-                    }
-                    if (submitButton) { submitButton.textContent = 'Enviando...'; }
-
-                    // Try the Cloudflare tunnel API host first (production), then local relative, then fallback
-                    const configHost = window.APP_CONFIG?.API_URL?.replace('/api/v1', '');
-                    const API_HOSTS = [ configHost || 'https://api.runa3.fit', '', 'https://runa3.fit' ];
-                    let res = null;
-                    let lastError = null;
-                    let triedHost = null;
-
-                    for (const host of API_HOSTS) {
-                        const url = host ? `${host}/api/v1/public/waitlist` : '/api/v1/public/waitlist';
-                        triedHost = url;
-                        try {
-                            const r = await fetch(url, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name, email }),
-                                mode: 'cors',
-                            });
-
-                            console.log('[Waitlist] tried', url, 'status', r.status);
-
-                            // If request succeeded or failed with a status other than 405, stop and handle it
-                            if (r.ok || r.status !== 405) {
-                                res = r;
-                                break;
-                            }
-
-                            // If 405, try next host
-                            lastError = r;
-                        } catch (e) {
-                            console.warn('[Waitlist] host failed', url, e);
-                            // Network error or CORS block - remember and try next
-                            lastError = e;
-                        }
-                    }
-
-                    if (res && triedHost) {
-                        console.log('[Waitlist] request completed using host', triedHost); 
-                    }
-
-                    if (!res) {
-                        // All hosts failed
-                        console.error('All waitlist POST attempts failed', lastError);
-                        const isNetworkError = lastError instanceof TypeError || lastError?.message?.includes('Failed to fetch');
-                        feedback.style.display = 'block';
-                        feedback.style.color = 'var(--accent)';
-                        feedback.textContent = isNetworkError
-                            ? 'No se pudo conectar al servidor (intento desde cliente). Revisa la conexión o la configuración CORS.'
-                            : (lastError?.message || 'El servicio no está disponible desde esta página.');
-                        if (submitButton && 'disabled' in submitButton) submitButton.disabled = false;
-                        if (submitButton) submitButton.textContent = 'Enviar';
-                    } else {
-                        if (res.ok) {
-                            // No mostrar mensaje
-                            feedback.style.display = 'none';
-                            feedback.textContent = '';
-                            
-                            // Ocultar inputs
-                            const nameInput = document.getElementById('ri-name');
-                            const emailInput = document.getElementById('ri-email');
-                            if (nameInput) nameInput.style.display = 'none';
-                            if (emailInput) emailInput.style.display = 'none';
-                            
-                            // Actualizar botón con "Gracias Nombre"
-                            if (submitButton) {
-                                const firstName = name.split(' ')[0] || '';
-                                submitButton.textContent = firstName ? `Gracias ${firstName}` : 'Gracias';
-                                submitButton.disabled = true;
-                                submitButton.style.opacity = '1'; // Asegurar opacidad al 100 para leer bien
-                                submitButton.style.cursor = 'default';
-                            }
-                        } else if (res.status === 405) {
-                            feedback.style.display = 'block';
-                            feedback.style.color = 'var(--accent)';
-                            feedback.textContent = 'El servicio de solicitudes no está disponible desde este sitio (405). Por favor, intentá más tarde.';
-                            if (submitButton && 'disabled' in submitButton) submitButton.disabled = false;
-                            if (submitButton) submitButton.textContent = 'Enviar';
-                        } else {
-                            const data = await res.json().catch(() => ({}));
-                            const statusInfo = res.status ? ` (status ${res.status})` : '';
-                            const msg = data?.message || `Error al enviar. Intenta de nuevo.${statusInfo}`;
-                            feedback.style.display = 'block'; feedback.style.color = 'var(--accent)'; feedback.textContent = msg;
-                            submitButton.disabled = false;
-                            submitButton.textContent = 'Enviar';
-                        }
-                    }
-                }catch(err){
-                    console.error(err);
-                    const isNetworkError = err instanceof TypeError || err.message?.includes('Failed to fetch');
-                    feedback.style.display = 'block';
-                    feedback.style.color = 'var(--accent)';
-                    feedback.textContent = isNetworkError
-                        ? 'No se pudo conectar al servidor. Asegurate que el backend esté corriendo y prueba de nuevo.'
-                        : (err.message || 'Error al enviar. Revisa tu conexión.');
-                    if (submitButton && 'disabled' in submitButton) submitButton.disabled = false;
-                    if (submitButton) submitButton.textContent = 'Enviar';
+                enviar.disabled = true;
+                enviar.textContent = 'Enviando…';
+                try {
+                    var r = await fetch(API_URL + '/public/waitlist', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: name, email: email }),
+                    });
+                    if (!r.ok) throw new Error('status ' + r.status);
+                    form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
+                    enviar.textContent = 'Recibido';
+                    avisar('Gracias, ' + name.split(' ')[0] + '. Te vamos a escribir a ' + email + '.', false);
+                } catch (err) {
+                    console.warn('[waitlist]', err);
+                    enviar.disabled = false;
+                    enviar.textContent = 'Enviar';
+                    avisar('No pudimos enviarlo. Probá de nuevo en un rato.', true);
                 }
             });
         })();
 
-        // Registro del Service Worker para PWA
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW registrado'))
-                    .catch(err => console.log('SW error', err));
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function () {});
             });
         }
     </script>
