@@ -89,7 +89,7 @@
         .portal .marca .nombre { font-size: 26px; letter-spacing: -0.8px; }
         .portal .marca .sub { font-size: 10px; }
         #portal-turnstile:not(:empty) { margin-top: 24px; }
-        #portal-aviso { margin-top: 24px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+        #portal-aviso { margin-top: 24px; font-family: var(--mono); font-size: 12px; letter-spacing: 1px; line-height: 1.7; color: var(--text-secondary); }
         #portal-reintentar { margin-top: 16px; }
 
         /* Nuestra cara de Turnstile: una luz de cobre que recorre el pie de la
@@ -400,7 +400,7 @@
             // inventa nada, y la página se abre únicamente en su `callback`.
             function portalFalla() {
                 portal.dataset.estado = 'error';
-                portalAviso.textContent = 'No pudimos verificar tu navegador. Probá de nuevo.';
+                portalAviso.textContent = 'Huella humana sin confirmar. La señal no alcanzó para abrir la puerta.';
                 portalAviso.hidden = false;
                 portalReintentar.hidden = false;
             }
