@@ -86,8 +86,23 @@
         }
         /* El borde claro es parte del cuadro, también en oscuro, y no se puede
            sacar: se recorta 1 px por lado desde afuera, sin tocar lo de adentro */
-        .recorte { width: 298px; height: 63px; overflow: hidden; }
-        #turnstile-cuadro { width: 300px; height: 65px; margin: -1px; }
+        .recorte { position: relative; width: 298px; height: 63px; overflow: hidden; }
+        #turnstile-cuadro { position: relative; width: 300px; height: 65px; margin: -1px; }
+
+        /* Esqueleto con la forma del cuadro mientras llega el de Cloudflare, que lo tapa */
+        .esqueleto { position: absolute; inset: 0; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: #232323; }
+        .esqueleto i { display: block; background: #333333; }
+        .esqueleto .casilla { width: 24px; height: 24px; flex: none; }
+        .esqueleto .texto { width: 96px; height: 10px; }
+        .esqueleto .logo { width: 56px; height: 18px; margin-left: auto; }
+        .esqueleto::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0) 70%);
+            transform: translateX(-100%);
+            animation: brillo 1.2s ease-in-out infinite;
+        }
+        @keyframes brillo { to { transform: translateX(100%); } }
+        @media (prefers-reduced-motion: reduce) { .esqueleto::after { animation: none; } }
 
         /* La línea de carga: recorre el pie de esa placa mientras Turnstile trabaja */
         .carga { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
@@ -313,7 +328,10 @@
 
 <body>
     <div id="turnstile-esquina" data-estado="verificando">
-        <div class="recorte"><div id="turnstile-cuadro"></div></div>
+        <div class="recorte">
+            <div class="esqueleto" aria-hidden="true"><i class="casilla"></i><i class="texto"></i><i class="logo"></i></div>
+            <div id="turnstile-cuadro"></div>
+        </div>
         <span class="carga" aria-hidden="true"></span>
         <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
     </div>
