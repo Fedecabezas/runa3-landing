@@ -17,7 +17,7 @@
       el gatekeeper solo la deja pasar con un código vigente en ?k= y le pone
       data-enrol en el <body> (la clase del código). Sin eso no dibuja nada.
       Los botones abren auth.runa3.fit con el código en una ventana; auth lo canjea, deja el
-      comprobante en app.runa3.fit/vuelta, y esta pestaña pasa a la app. La vuelta es fija.
+      comprobante en app.runa3.fit/vuelta.html, y esta pestaña pasa a la app. La vuelta es fija.
       La cara es la de index.html (tema web-oscuro de la app).
     -->
     <style>
@@ -218,7 +218,7 @@
                 return u.toString();
             }
 
-            // La ventana termina en app.runa3.fit/vuelta, que deja una seña en la
+            // La ventana termina en app.runa3.fit/vuelta.html, que deja una seña en la
             // cookie del dominio: esta pestaña, en otro origen, la espera y pasa a la app.
             function esperarLaVuelta() {
                 var reloj = setInterval(function () {
@@ -237,7 +237,7 @@
                     if (sinVentanas) return location.assign(urlDe(proveedor, VUELTA));
                     var ancho = 480, alto = 640;
                     var ventana = window.open(
-                        urlDe(proveedor, VUELTA + 'vuelta'),
+                        urlDe(proveedor, VUELTA + 'vuelta.html'),
                         'runa3-login',
                         'popup,width=' + ancho + ',height=' + alto +
                         ',left=' + (screenX + (outerWidth - ancho) / 2) + ',top=' + (screenY + (outerHeight - alto) / 2)
