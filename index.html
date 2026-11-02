@@ -243,6 +243,7 @@
             cursor: pointer;
         }
         .modal-actions { display: flex; justify-content: flex-end; }
+        .turnstile:not(:empty) { margin-bottom: 16px; }
         #request-info-feedback { margin-top: 14px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
         #request-info-feedback.error { color: var(--accent-hover); }
     </style>
@@ -283,6 +284,7 @@
                 <input id="ri-name" name="name" type="text" required minlength="2" maxlength="100" autocomplete="name">
                 <label for="ri-email">Correo</label>
                 <input id="ri-email" name="email" type="email" required autocomplete="email">
+                <div id="ri-turnstile" class="turnstile"></div>
                 <div class="modal-actions">
                     <button id="submit-waitlist-btn" type="submit" class="btn">Enviar</button>
                 </div>
@@ -300,6 +302,47 @@
             var feedback = document.getElementById('request-info-feedback');
             var enviar = document.getElementById('submit-waitlist-btn');
 
+            // Turnstile: este formulario es el único punto abierto a bots
+            // (Fede, 2026-11-02). Se carga recién al abrir el modal; "Enviar"
+            // se habilita cuando Cloudflare da el visto bueno. Solo pide
+            // interacción si sospecha.
+            var SITE_KEY = '0x4AAAAAACNkOUXNzttziqgp';
+            var widget = null;
+            var tokenDeTurnstile = null;
+
+            function conTurnstile(hacer) {
+                if (window.turnstile) return hacer();
+                var s = document.createElement('script');
+                s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+                s.async = true;
+                s.onload = hacer;
+                s.onerror = function () { avisar('No pudimos cargar la verificación. Probá de nuevo en un rato.', true); };
+                document.head.appendChild(s);
+            }
+
+            function sinToken() {
+                tokenDeTurnstile = null;
+                enviar.disabled = true;
+            }
+
+            function dibujarTurnstile() {
+                if (widget !== null) return window.turnstile.reset(widget);
+                widget = window.turnstile.render('#ri-turnstile', {
+                    sitekey: SITE_KEY,
+                    theme: 'dark',
+                    appearance: 'interaction-only',
+                    callback: function (token) {
+                        tokenDeTurnstile = token;
+                        enviar.disabled = false;
+                    },
+                    'expired-callback': sinToken,
+                    'error-callback': function () {
+                        sinToken();
+                        avisar('No pudimos verificar el envío. Probá de nuevo en un rato.', true);
+                    },
+                });
+            }
+
             function avisar(texto, esError) {
                 feedback.hidden = false;
                 feedback.textContent = texto;
@@ -310,6 +353,8 @@
                 modal.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
                 document.getElementById('ri-name').focus();
+                sinToken();
+                conTurnstile(dibujarTurnstile);
             }
 
             function cerrar() {
@@ -318,8 +363,8 @@
                 feedback.hidden = true;
                 form.reset();
                 form.querySelectorAll('input').forEach(function (i) { i.disabled = false; });
-                enviar.disabled = false;
                 enviar.textContent = 'Enviar';
+                sinToken();
             }
 
             btn.addEventListener('click', abrir);
@@ -334,6 +379,7 @@
                 var email = document.getElementById('ri-email').value.trim();
                 if (name.length < 2) return avisar('Escribí tu nombre.', true);
                 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return avisar('Ese correo no parece válido.', true);
+                if (!tokenDeTurnstile) return;
 
                 enviar.disabled = true;
                 enviar.textContent = 'Enviando…';
@@ -341,7 +387,7 @@
                     var r = await fetch(API_URL + '/public/waitlist', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name, email: email }),
+                        body: JSON.stringify({ name: name, email: email, turnstileToken: tokenDeTurnstile }),
                     });
                     if (!r.ok) throw new Error('status ' + r.status);
                     form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
@@ -349,9 +395,11 @@
                     avisar('Gracias, ' + name.split(' ')[0] + '. Te vamos a escribir a ' + email + '.', false);
                 } catch (err) {
                     console.warn('[waitlist]', err);
-                    enviar.disabled = false;
                     enviar.textContent = 'Enviar';
                     avisar('No pudimos enviarlo. Probá de nuevo en un rato.', true);
+                    // Cada token sirve una sola vez: para reintentar hace falta otro
+                    sinToken();
+                    if (widget !== null) window.turnstile.reset(widget);
                 }
             });
         })();
