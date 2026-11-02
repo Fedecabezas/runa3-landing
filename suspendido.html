@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Runa3 · Acceso suspendido</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!--
+      Acceso suspendido (PLA-26, C-028 1.4). Página pública y estática: Runa manda
+      acá a quien tiene la membresía cancelada. Sin JS, sin llamadas, sin datos de
+      la persona ni parámetros. La placa es la de sign.html.
+    -->
+    <style>
+        :root {
+            --surface-base: #0D0D0D;
+            --surface-raised: #1A1A1A;
+            --text-primary: #F5F5F5;
+            --text-secondary: #A3A3A3;
+            --text-tertiary: #737373;
+            --accent: #C97C5D;
+            --accent-hover: #E8956F;
+            --accent-surface: #1F1714;
+            --border-subtle: #333333;
+            --border-default: #404040;
+            --mono: 'JetBrains Mono', ui-monospace, monospace;
+            --ruido: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { min-height: 100%; background-color: var(--surface-base); }
+
+        body {
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201, 124, 93, 0.10) 0%, rgba(13, 13, 13, 0) 70%),
+                var(--surface-base);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: var(--ruido);
+            pointer-events: none;
+        }
+
+        .page-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100dvh;
+            padding: 24px 16px;
+        }
+
+        .tarjeta {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            background-image: var(--ruido), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0) 100%);
+            background-color: rgba(26, 26, 26, 0.6);
+            border: 1px solid rgba(51, 51, 51, 0.45);
+            padding: 32px 28px;
+            /* Sobre #0D0D0D una sombra suave no se ve: una corta y dura, y otra larga */
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9), 0 10px 28px rgba(0, 0, 0, 0.85), 0 24px 64px rgba(0, 0, 0, 0.5);
+            animation: entrada 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Las cuatro esquinas en cobre, sobre el borde (como el login de la app) */
+        .esquina { position: absolute; width: 12px; height: 12px; border: 0 solid var(--accent); pointer-events: none; }
+        .esquina.e1 { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; }
+        .esquina.e2 { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; }
+        .esquina.e3 { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; }
+        .esquina.e4 { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+
+        /* Un reflejo cruza la tarjeta una sola vez, al aparecer */
+        .reflejo { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .reflejo::after {
+            content: ""; position: absolute; top: -50%; bottom: -50%; width: 45%; left: -60%;
+            background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(232,149,111,0.10) 45%, rgba(255,255,255,0.14) 50%, rgba(232,149,111,0.10) 55%, rgba(255,255,255,0) 100%);
+            transform: skewX(-12deg);
+            animation: reflejo 0.9s cubic-bezier(0.45, 0, 0.2, 1) 0.35s 1 forwards;
+        }
+        @keyframes reflejo { from { left: -60%; } to { left: 120%; } }
+
+        @keyframes entrada {
+            from { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+            to   { opacity: 1; transform: none; filter: none; }
+        }
+
+        .marca { display: flex; align-items: baseline; gap: 12px; margin-bottom: 32px; }
+        .marca .nombre { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; }
+        .marca .sub { font-family: var(--mono); font-size: 10px; letter-spacing: 4px; color: var(--text-tertiary); }
+
+        .clase {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        h1 { font-size: 30px; font-weight: 300; letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 12px; }
+
+        .bajada { color: var(--text-secondary); font-size: 15px; font-weight: 300; line-height: 1.6; margin-bottom: 28px; }
+
+        /* A la medida del botón más largo, no de la placa. Entran de izquierda a
+           derecha; acá no hay esqueleto porque no se espera nada: el gatekeeper ya
+           validó el código. */
+        .acciones {
+            display: flex; flex-direction: column; gap: 10px;
+            width: fit-content; min-width: min(280px, 100%); max-width: 100%;
+            animation: botones 0.6s ease-in-out;
+        }
+        @keyframes botones { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        @media (prefers-reduced-motion: reduce) { .acciones { animation: none; } }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--surface-base);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .btn:hover, .btn:focus-visible { border-color: var(--accent); background: var(--accent-surface); outline: none; }
+        .btn svg { width: 24px; height: 24px; flex: none; }
+        .btn .flecha { margin-left: auto; color: var(--text-tertiary); font-family: var(--mono); }
+
+        .nota {
+            margin-top: 24px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            line-height: 1.6;
+        }
+
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <main class="tarjeta">
+            <span class="reflejo" aria-hidden="true"></span>
+            <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
+            <div class="marca"><span class="nombre">RUNA3</span><span class="sub">PLATFORM</span></div>
+            <p class="clase">Acceso suspendido</p>
+            <h1>Tu acceso está suspendido</h1>
+            <p class="bajada">Tu membresía no está activa, por eso cerramos tu sesión en este aparato. Escribinos y lo resolvemos para que vuelvas a entrar.</p>
+            <div class="acciones">
+                <a class="btn" href="/">Ir a la página de Runa3 <span class="flecha">→</span></a>
+            </div>
+            <p class="nota">Esta página no guarda ni muestra datos tuyos.</p>
+        </main>
+    </div>
+</body>
+
+</html>
