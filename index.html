@@ -21,8 +21,8 @@
       tarjetas cuadradas con esquinas de cobre y un reflejo al aparecer.
       No hay botón a la app: está cerrada y se entra solo con el link de primer
       acceso que manda el equipo (runa3.fit/sign, AUT-31).
-      Lo primero es Turnstile (Fede, 2026-11-02): la página se muestra recién
-      cuando Cloudflare da el visto bueno.
+      Turnstile (Fede, 2026-11-02): la página se ve entera, el cuadro de Cloudflare
+      va abajo a la izquierda y "Solicitar información" aparece con su visto bueno.
     -->
     <style>
         :root {
@@ -74,24 +74,28 @@
 
         [hidden] { display: none !important; }
 
-        /* Lo primero que se ve: la marca y Turnstile, nada más */
-        .portal {
-            position: relative;
-            z-index: 1;
-            min-height: 100dvh;
-            padding: 24px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* El cuadro de Cloudflare, abajo a la izquierda y por encima del modal */
+        #turnstile-esquina { position: fixed; left: 16px; bottom: 16px; z-index: 20; }
+
+        /* La luz de carga: recorre el pie de la placa mientras Turnstile trabaja */
+        .carga { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
+        .carga::after {
+            content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -40%;
+            background: linear-gradient(90deg, rgba(232,149,111,0) 0%, rgba(232,149,111,0.95) 50%, rgba(232,149,111,0) 100%);
+            animation: carga 1.4s ease-in-out infinite;
         }
-        .portal .placa { width: 100%; max-width: 420px; padding: 32px 28px; }
-        .portal .marca { margin-bottom: 0; }
-        .portal .marca .nombre { font-size: 26px; letter-spacing: -0.8px; }
-        .portal .marca .sub { font-size: 10px; }
-        /* El cuadro de Cloudflare se ve siempre, bien separado de la marca (Fede, 2026-11-02) */
-        #portal-turnstile { margin-top: 48px; }
-        #portal-aviso { margin-top: 24px; font-family: var(--mono); font-size: 12px; letter-spacing: 1px; line-height: 1.7; color: var(--text-secondary); }
-        #portal-reintentar { margin-top: 16px; }
+        @keyframes carga { from { left: -40%; } to { left: 100%; } }
+        .placa[data-estado="verificando"] .carga { opacity: 1; }
+        @media (prefers-reduced-motion: reduce) { .carga::after { animation: none; left: 30%; } }
+
+        /* "Solicitar información" tiene su lugar guardado y aparece al terminar */
+        .placa[data-estado="verificando"] .acciones { visibility: hidden; }
+        .placa[data-estado="error"] .acciones { display: none; }
+        .placa[data-estado="listo"] .acciones { animation: aparecer 0.4s ease; }
+        @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+
+        #aviso { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; line-height: 1.7; color: var(--text-secondary); }
+        #reintentar { margin-top: 16px; }
 
         .container {
             flex: 1;
@@ -133,7 +137,7 @@
             content: ""; position: absolute; top: -50%; bottom: -50%; width: 45%; left: -60%;
             background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(232,149,111,0.10) 45%, rgba(255,255,255,0.14) 50%, rgba(232,149,111,0.10) 55%, rgba(255,255,255,0) 100%);
             transform: skewX(-12deg);
-            animation: reflejo 0.9s cubic-bezier(0.45, 0, 0.2, 1) 0.35s 1 forwards;
+            animation: reflejo 0.9s cubic-bezier(0.45, 0, 0.2, 1) 1 forwards;
         }
         @keyframes reflejo { from { left: -60%; } to { left: 120%; } }
 
@@ -289,27 +293,19 @@
             cursor: pointer;
         }
         .modal-actions { display: flex; justify-content: flex-end; }
-        .turnstile:not(:empty) { margin-bottom: 16px; }
         #request-info-feedback { margin-top: 14px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
         #request-info-feedback.error { color: var(--accent-hover); }
     </style>
 </head>
 
 <body>
-    <div class="portal" id="portal">
-        <div class="placa">
-            <div class="marca"><span class="nombre">RUNA3</span><span class="sub">PLATFORM</span></div>
-            <div id="portal-turnstile"></div>
-            <p id="portal-aviso" role="alert" hidden></p>
-            <button id="portal-reintentar" class="btn" type="button" hidden>Reintentar</button>
-            <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
-        </div>
-    </div>
+    <div id="turnstile-esquina"></div>
 
-    <div class="page-wrapper" id="pagina" hidden>
+    <div class="page-wrapper">
         <div class="container">
-            <main class="placa">
-                <span class="reflejo" aria-hidden="true"></span>
+            <main class="placa" id="placa" data-estado="verificando">
+                <span class="reflejo" id="reflejo" aria-hidden="true" hidden></span>
+                <span class="carga" aria-hidden="true"></span>
                 <div class="marca"><span class="nombre">RUNA3</span><span class="sub">PLATFORM</span></div>
 
                 <h1>Science <span class="cobre">Health</span></h1>
@@ -326,6 +322,8 @@
                 <div class="acciones">
                     <button id="request-info-btn" class="btn" type="button">Solicitar información <span class="flecha" aria-hidden="true">→</span></button>
                 </div>
+                <p id="aviso" role="alert" hidden></p>
+                <button id="reintentar" class="btn" type="button" hidden>Reintentar</button>
                 <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
             </main>
         </div>
@@ -345,7 +343,6 @@
                 <input id="ri-name" name="name" type="text" required minlength="2" maxlength="100" autocomplete="name">
                 <label for="ri-email">Correo</label>
                 <input id="ri-email" name="email" type="email" required autocomplete="email">
-                <div id="ri-turnstile" class="turnstile"></div>
                 <div class="modal-actions">
                     <button id="submit-waitlist-btn" type="submit" class="btn">Enviar</button>
                 </div>
@@ -363,13 +360,25 @@
             var feedback = document.getElementById('request-info-feedback');
             var enviar = document.getElementById('submit-waitlist-btn');
 
-            // Turnstile (Fede, 2026-11-02), dos veces: antes de mostrar la página
-            // y en el formulario, que es lo único que llega al server y el que
-            // valida su token allá. Visible y en oscuro: así no parece que la
-            // página está demorando.
+            // Turnstile (Fede, 2026-11-02): la página se ve entera desde el
+            // principio, el cuadro de Cloudflare va abajo a la izquierda y la luz
+            // de carga corre al pie de la placa. Cuando termina aparece "Solicitar
+            // información". Ese visto bueno es el token que después valida el
+            // server: sirve una vez y dura 5 minutos, si no, se vuelve a verificar.
             var SITE_KEY = '0x4AAAAAACNkOUXNzttziqgp';
+            var TOKEN_VALE_MS = 280000;
+            var placa = document.getElementById('placa');
+            var reflejo = document.getElementById('reflejo');
+            var aviso = document.getElementById('aviso');
+            var reintentar = document.getElementById('reintentar');
             var widget = null;
-            var tokenDeTurnstile = null;
+            var quitarWidget = null;
+            var token = null;
+            var tokenEn = 0;
+
+            function tokenVigente() {
+                return !!token && Date.now() - tokenEn < TOKEN_VALE_MS;
+            }
 
             function conTurnstile(hacer, alFallar) {
                 if (window.turnstile) return hacer();
@@ -381,66 +390,49 @@
                 document.head.appendChild(s);
             }
 
-            // ── El portal: la página aparece recién con el visto bueno ──
-            var portal = document.getElementById('portal');
-            var pagina = document.getElementById('pagina');
-            var portalAviso = document.getElementById('portal-aviso');
-            var portalReintentar = document.getElementById('portal-reintentar');
-            var widgetDelPortal = null;
-
-            function portalFalla() {
-                portalAviso.textContent = 'Esta vez no pudimos distinguirte de una máquina.';
-                portalAviso.hidden = false;
-                portalReintentar.hidden = false;
+            function falla() {
+                var texto = 'Esta vez no pudimos distinguirte de una máquina.';
+                placa.dataset.estado = 'error';
+                aviso.textContent = texto;
+                aviso.hidden = false;
+                reintentar.hidden = false;
+                if (modal.getAttribute('aria-hidden') === 'false') avisar(texto, true);
             }
 
-            function abrirPortal() {
-                portalAviso.hidden = true;
-                portalReintentar.hidden = true;
+            function verificar() {
+                token = null;
+                enviar.disabled = true;
+                placa.dataset.estado = 'verificando';
+                aviso.hidden = true;
+                reintentar.hidden = true;
+                clearTimeout(quitarWidget);
                 conTurnstile(function () {
-                    if (widgetDelPortal !== null) return window.turnstile.reset(widgetDelPortal);
-                    widgetDelPortal = window.turnstile.render('#portal-turnstile', {
+                    if (widget !== null) return window.turnstile.reset(widget);
+                    widget = window.turnstile.render('#turnstile-esquina', {
                         sitekey: SITE_KEY,
                         theme: 'dark',
-                        size: 'flexible',
-                        callback: function () {
-                            portal.hidden = true;
-                            pagina.hidden = false;
-                            window.turnstile.remove(widgetDelPortal);
-                            widgetDelPortal = null;
+                        callback: function (t) {
+                            token = t;
+                            tokenEn = Date.now();
+                            placa.dataset.estado = 'listo';
+                            reflejo.hidden = false;
+                            enviar.disabled = false;
+                            if (feedback.className !== 'error') feedback.hidden = true;
+                            // Se llega a ver el tilde del cuadro antes de que se vaya
+                            quitarWidget = setTimeout(function () {
+                                window.turnstile.remove(widget);
+                                widget = null;
+                            }, 1000);
                         },
-                        'error-callback': function () { portalFalla(); return true; },
-                        'timeout-callback': portalFalla,
-                        'unsupported-callback': portalFalla,
+                        'error-callback': function () { falla(); return true; },
+                        'timeout-callback': falla,
+                        'unsupported-callback': falla,
                     });
-                }, portalFalla);
+                }, falla);
             }
 
-            portalReintentar.addEventListener('click', abrirPortal);
-            abrirPortal();
-
-            function sinToken() {
-                tokenDeTurnstile = null;
-                enviar.disabled = true;
-            }
-
-            function dibujarTurnstile() {
-                if (widget !== null) return window.turnstile.reset(widget);
-                widget = window.turnstile.render('#ri-turnstile', {
-                    sitekey: SITE_KEY,
-                    theme: 'dark',
-                    size: 'flexible',
-                    callback: function (token) {
-                        tokenDeTurnstile = token;
-                        enviar.disabled = false;
-                    },
-                    'expired-callback': sinToken,
-                    'error-callback': function () {
-                        sinToken();
-                        avisar('No pudimos verificar el envío. Probá de nuevo en un rato.', true);
-                    },
-                });
-            }
+            reintentar.addEventListener('click', verificar);
+            verificar();
 
             function avisar(texto, esError) {
                 feedback.hidden = false;
@@ -452,10 +444,7 @@
                 modal.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
                 document.getElementById('ri-name').focus();
-                sinToken();
-                conTurnstile(dibujarTurnstile, function () {
-                    avisar('No pudimos cargar la verificación. Probá de nuevo en un rato.', true);
-                });
+                if (!tokenVigente()) verificar();
             }
 
             function cerrar() {
@@ -465,7 +454,7 @@
                 form.reset();
                 form.querySelectorAll('input').forEach(function (i) { i.disabled = false; });
                 enviar.textContent = 'Enviar';
-                sinToken();
+                enviar.disabled = !tokenVigente();
             }
 
             btn.addEventListener('click', abrir);
@@ -480,15 +469,21 @@
                 var email = document.getElementById('ri-email').value.trim();
                 if (name.length < 2) return avisar('Escribí tu nombre.', true);
                 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return avisar('Ese correo no parece válido.', true);
-                if (!tokenDeTurnstile) return;
+                if (!tokenVigente()) {
+                    verificar();
+                    return avisar('Volvemos a verificar. Enviá de nuevo en un momento.', false);
+                }
 
+                // Cada token sirve una sola vez
+                var tokenDelEnvio = token;
+                token = null;
                 enviar.disabled = true;
                 enviar.textContent = 'Enviando…';
                 try {
                     var r = await fetch(API_URL + '/public/waitlist', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name, email: email, turnstileToken: tokenDeTurnstile }),
+                        body: JSON.stringify({ name: name, email: email, turnstileToken: tokenDelEnvio }),
                     });
                     if (!r.ok) throw new Error('status ' + r.status);
                     form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
@@ -497,10 +492,9 @@
                 } catch (err) {
                     console.warn('[waitlist]', err);
                     enviar.textContent = 'Enviar';
-                    avisar('No pudimos enviarlo. Probá de nuevo en un rato.', true);
-                    // Cada token sirve una sola vez: para reintentar hace falta otro
-                    sinToken();
-                    if (widget !== null) window.turnstile.reset(widget);
+                    // Para reintentar hace falta otro token
+                    verificar();
+                    avisar('No pudimos enviarlo. Probá de nuevo en un momento.', true);
                 }
             });
         })();
