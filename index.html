@@ -371,12 +371,14 @@
             <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
             <button class="modal-close" type="button" aria-label="Cerrar" data-close>&times;</button>
             <h3 id="request-info-title">Solicitar información</h3>
-            <p class="bajada">Dejanos tu nombre y tu correo. Te escribimos cuando haya lugar.</p>
+            <p class="bajada">Dejanos tus datos. Te escribimos cuando haya lugar.</p>
             <form id="request-info-form" novalidate>
                 <label for="ri-name">Nombre</label>
                 <input id="ri-name" name="name" type="text" required minlength="2" maxlength="100" autocomplete="name">
                 <label for="ri-email">Correo</label>
                 <input id="ri-email" name="email" type="email" required autocomplete="email">
+                <label for="ri-phone">Celular, con código de país</label>
+                <input id="ri-phone" name="phone" type="tel" required maxlength="32" autocomplete="tel" placeholder="+54 9 11 1234 5678">
                 <div class="modal-actions">
                     <button id="submit-waitlist-btn" type="submit" class="btn">Enviar</button>
                 </div>
@@ -507,8 +509,10 @@
                 e.preventDefault();
                 var name = document.getElementById('ri-name').value.trim();
                 var email = document.getElementById('ri-email').value.trim();
+                var phone = document.getElementById('ri-phone').value.trim();
                 if (name.length < 2) return avisar('Escribí tu nombre.', true);
                 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return avisar('Ese correo no parece válido.', true);
+                if (!/^\+?[0-9][0-9 ()-]{6,30}$/.test(phone)) return avisar('Escribí tu celular con el código de país.', true);
                 if (!tokenVigente()) {
                     verificar();
                     return avisar('Volvemos a verificar. Enviá de nuevo en un momento.', false);
@@ -523,7 +527,7 @@
                     var r = await fetch(API_URL + '/public/waitlist', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name, email: email, turnstileToken: tokenDelEnvio }),
+                        body: JSON.stringify({ name: name, email: email, phone: phone, turnstileToken: tokenDelEnvio }),
                     });
                     if (!r.ok) throw new Error('status ' + r.status);
                     form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
