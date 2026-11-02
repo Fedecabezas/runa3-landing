@@ -22,7 +22,7 @@
       No hay botón a la app: está cerrada y se entra solo con el link de primer
       acceso que manda el equipo (runa3.fit/sign, AUT-31).
       Turnstile (Fede, 2026-11-02): la página se ve entera, el cuadro de Cloudflare
-      va abajo a la izquierda y "Solicitar información" aparece con su visto bueno.
+      va abajo a la derecha y "Solicitar información" aparece con su visto bueno.
     -->
     <style>
         :root {
@@ -74,12 +74,12 @@
 
         [hidden] { display: none !important; }
 
-        /* El cuadro de Cloudflare, abajo a la izquierda y por encima del modal, en
+        /* El cuadro de Cloudflare, abajo a la derecha y por encima del modal, en
            una placa de su mismo tamaño (300 x 65). El iframe es suyo: lo nuestro
            va alrededor. Se ve antes de que llegue el script de Cloudflare */
         #turnstile-esquina {
             position: fixed;
-            left: 16px;
+            right: 16px;
             bottom: 16px;
             z-index: 20;
             box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9), 0 10px 28px rgba(0, 0, 0, 0.85), 0 24px 64px rgba(0, 0, 0, 0.5);
@@ -103,8 +103,10 @@
         /* "Solicitar información" tiene su lugar guardado y aparece al terminar */
         .placa[data-estado="verificando"] .acciones { visibility: hidden; }
         .placa[data-estado="error"] .acciones { display: none; }
-        .placa[data-estado="listo"] .acciones { animation: aparecer 0.4s ease; }
-        @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+        /* Entra de izquierda a derecha, con el tiempo y la curva de la línea de carga */
+        .placa[data-estado="listo"] .acciones { animation: aparecer 1.4s ease-in-out; }
+        @keyframes aparecer { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        @media (prefers-reduced-motion: reduce) { .placa[data-estado="listo"] .acciones { animation: none; } }
 
         #aviso { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; line-height: 1.7; color: var(--text-secondary); }
         #reintentar { margin-top: 16px; }
@@ -376,8 +378,8 @@
             var enviar = document.getElementById('submit-waitlist-btn');
 
             // Turnstile (Fede, 2026-11-02): la página se ve entera desde el
-            // principio, el cuadro de Cloudflare va abajo a la izquierda y la luz
-            // de carga corre al pie de la placa. Cuando termina aparece "Solicitar
+            // principio, el cuadro de Cloudflare va abajo a la derecha, con la
+            // línea de carga al pie. Cuando termina aparece "Solicitar
             // información". Ese visto bueno es el token que después valida el
             // server: sirve una vez y dura 5 minutos, si no, se vuelve a verificar.
             var SITE_KEY = '0x4AAAAAACNkOUXNzttziqgp';
