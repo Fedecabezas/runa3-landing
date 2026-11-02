@@ -537,7 +537,7 @@
                     if (!r.ok) throw new Error('status ' + r.status);
                     form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
                     enviar.textContent = 'Recibido';
-                    avisar('Recibimos tu solicitud. Te vamos a contactar a la brevedad.', false);
+                    avisar('Gracias. Nos pondremos en contacto a la brevedad.', false);
                 } catch (err) {
                     console.warn('[waitlist]', err);
                     enviar.textContent = 'Enviar';
