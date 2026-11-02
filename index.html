@@ -103,8 +103,8 @@
         /* "Solicitar información" tiene su lugar guardado y aparece al terminar */
         .placa[data-estado="verificando"] .acciones { visibility: hidden; }
         .placa[data-estado="error"] .acciones { display: none; }
-        /* Entra de izquierda a derecha, con el tiempo y la curva de la línea de carga */
-        .placa[data-estado="listo"] .acciones { animation: aparecer 1.4s ease-in-out; }
+        /* Entra de izquierda a derecha */
+        .placa[data-estado="listo"] .acciones { animation: aparecer 0.6s ease-in-out; }
         @keyframes aparecer { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
         @media (prefers-reduced-motion: reduce) { .placa[data-estado="listo"] .acciones { animation: none; } }
 
@@ -233,8 +233,7 @@
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn:disabled:hover { background: var(--surface-base); border-color: var(--border-default); }
         .btn .flecha { margin-left: auto; color: var(--text-tertiary); font-family: var(--mono); }
-        .acciones { display: flex; flex-direction: column; }
-        .acciones .btn { width: 100%; }
+        .acciones { display: flex; }
 
         footer {
             position: relative;
