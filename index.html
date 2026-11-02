@@ -92,6 +92,18 @@
         #portal-aviso { margin-top: 24px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
         #portal-reintentar { margin-top: 16px; }
 
+        /* Nuestra cara de Turnstile: una luz de cobre que recorre el pie de la
+           placa. No decide nada: la mueven los avisos del widget real */
+        .escaneo { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
+        .escaneo::after {
+            content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -40%;
+            background: linear-gradient(90deg, rgba(232,149,111,0) 0%, rgba(232,149,111,0.95) 50%, rgba(232,149,111,0) 100%);
+            animation: escaneo 1.4s ease-in-out infinite;
+        }
+        @keyframes escaneo { from { left: -40%; } to { left: 100%; } }
+        .portal[data-estado="verificando"] .escaneo { opacity: 1; }
+        @media (prefers-reduced-motion: reduce) { .escaneo::after { animation: none; left: 30%; } }
+
         .container {
             flex: 1;
             width: 100%;
@@ -298,6 +310,7 @@
             <div id="portal-turnstile"></div>
             <p id="portal-aviso" role="alert" hidden></p>
             <button id="portal-reintentar" class="btn" type="button" hidden>Reintentar</button>
+            <span class="escaneo" aria-hidden="true"></span>
             <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
         </div>
     </div>
@@ -383,13 +396,17 @@
             var portalReintentar = document.getElementById('portal-reintentar');
             var widgetDelPortal = null;
 
+            // El estado lo ponen solo los avisos del widget: el indicador no
+            // inventa nada, y la página se abre únicamente en su `callback`.
             function portalFalla() {
+                portal.dataset.estado = 'error';
                 portalAviso.textContent = 'No pudimos verificar tu navegador. Probá de nuevo.';
                 portalAviso.hidden = false;
                 portalReintentar.hidden = false;
             }
 
             function abrirPortal() {
+                portal.dataset.estado = 'verificando';
                 portalAviso.hidden = true;
                 portalReintentar.hidden = true;
                 conTurnstile(function () {
@@ -404,6 +421,10 @@
                             window.turnstile.remove(widgetDelPortal);
                             widgetDelPortal = null;
                         },
+                        // Cloudflare sospecha y pide un click: ese cuadro es suyo,
+                        // no se puede esconder ni rediseñar. El nuestro se aparta.
+                        'before-interactive-callback': function () { portal.dataset.estado = 'interaccion'; },
+                        'after-interactive-callback': function () { portal.dataset.estado = 'verificando'; },
                         'error-callback': function () { portalFalla(); return true; },
                         'timeout-callback': portalFalla,
                         'unsupported-callback': portalFalla,
