@@ -88,23 +88,10 @@
         .portal .marca { margin-bottom: 0; }
         .portal .marca .nombre { font-size: 26px; letter-spacing: -0.8px; }
         .portal .marca .sub { font-size: 10px; }
-        /* Cuando el cuadro de Cloudflare se ve (falla o pide un click), bien separado de la marca */
-        .portal[data-estado="error"] #portal-turnstile,
-        .portal[data-estado="interaccion"] #portal-turnstile { margin-top: 48px; }
+        /* El cuadro de Cloudflare se ve siempre, bien separado de la marca (Fede, 2026-11-02) */
+        #portal-turnstile { margin-top: 48px; }
         #portal-aviso { margin-top: 24px; font-family: var(--mono); font-size: 12px; letter-spacing: 1px; line-height: 1.7; color: var(--text-secondary); }
         #portal-reintentar { margin-top: 16px; }
-
-        /* Nuestra cara de Turnstile: una luz de cobre que recorre el pie de la
-           placa. No decide nada: la mueven los avisos del widget real */
-        .escaneo { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; overflow: hidden; opacity: 0; transition: opacity 0.3s ease; }
-        .escaneo::after {
-            content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -40%;
-            background: linear-gradient(90deg, rgba(232,149,111,0) 0%, rgba(232,149,111,0.95) 50%, rgba(232,149,111,0) 100%);
-            animation: escaneo 1.4s ease-in-out infinite;
-        }
-        @keyframes escaneo { from { left: -40%; } to { left: 100%; } }
-        .portal[data-estado="verificando"] .escaneo { opacity: 1; }
-        @media (prefers-reduced-motion: reduce) { .escaneo::after { animation: none; left: 30%; } }
 
         .container {
             flex: 1;
@@ -315,7 +302,6 @@
             <div id="portal-turnstile"></div>
             <p id="portal-aviso" role="alert" hidden></p>
             <button id="portal-reintentar" class="btn" type="button" hidden>Reintentar</button>
-            <span class="escaneo" aria-hidden="true"></span>
             <span class="esquina e1" aria-hidden="true"></span><span class="esquina e2" aria-hidden="true"></span><span class="esquina e3" aria-hidden="true"></span><span class="esquina e4" aria-hidden="true"></span>
         </div>
     </div>
@@ -379,7 +365,8 @@
 
             // Turnstile (Fede, 2026-11-02), dos veces: antes de mostrar la página
             // y en el formulario, que es lo único que llega al server y el que
-            // valida su token allá. Solo pide interacción si sospecha.
+            // valida su token allá. Visible y en oscuro: así no parece que la
+            // página está demorando.
             var SITE_KEY = '0x4AAAAAACNkOUXNzttziqgp';
             var widget = null;
             var tokenDeTurnstile = null;
@@ -401,17 +388,13 @@
             var portalReintentar = document.getElementById('portal-reintentar');
             var widgetDelPortal = null;
 
-            // El estado lo ponen solo los avisos del widget: el indicador no
-            // inventa nada, y la página se abre únicamente en su `callback`.
             function portalFalla() {
-                portal.dataset.estado = 'error';
                 portalAviso.textContent = 'Esta vez no pudimos distinguirte de una máquina.';
                 portalAviso.hidden = false;
                 portalReintentar.hidden = false;
             }
 
             function abrirPortal() {
-                portal.dataset.estado = 'verificando';
                 portalAviso.hidden = true;
                 portalReintentar.hidden = true;
                 conTurnstile(function () {
@@ -419,17 +402,13 @@
                     widgetDelPortal = window.turnstile.render('#portal-turnstile', {
                         sitekey: SITE_KEY,
                         theme: 'dark',
-                        appearance: 'interaction-only',
+                        size: 'flexible',
                         callback: function () {
                             portal.hidden = true;
                             pagina.hidden = false;
                             window.turnstile.remove(widgetDelPortal);
                             widgetDelPortal = null;
                         },
-                        // Cloudflare sospecha y pide un click: ese cuadro es suyo,
-                        // no se puede esconder ni rediseñar. El nuestro se aparta.
-                        'before-interactive-callback': function () { portal.dataset.estado = 'interaccion'; },
-                        'after-interactive-callback': function () { portal.dataset.estado = 'verificando'; },
                         'error-callback': function () { portalFalla(); return true; },
                         'timeout-callback': portalFalla,
                         'unsupported-callback': portalFalla,
@@ -450,7 +429,7 @@
                 widget = window.turnstile.render('#ri-turnstile', {
                     sitekey: SITE_KEY,
                     theme: 'dark',
-                    appearance: 'interaction-only',
+                    size: 'flexible',
                     callback: function (token) {
                         tokenDeTurnstile = token;
                         enviar.disabled = false;
