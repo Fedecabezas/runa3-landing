@@ -127,6 +127,10 @@
         @media (prefers-reduced-motion: reduce) { .acciones { animation: none; } }
 
         .btn {
+            width: 100%;
+            cursor: pointer;
+            font-family: inherit;
+            text-align: left;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -166,10 +170,13 @@
             <h1>Tu acceso está en pausa</h1>
             <p class="bajada">Escribinos y lo resolvemos para que vuelvas a entrar.</p>
             <div class="acciones">
-                <a class="btn" href="/">Ir a la página de Runa3 <span class="flecha">→</span></a>
+                <button type="button" class="btn" id="ir-a-runa3">Ir a la página de Runa3 <span class="flecha">→</span></button>
             </div>
         </main>
     </div>
+    <script>
+        document.getElementById('ir-a-runa3').addEventListener('click', function () { location.assign('/'); });
+    </script>
 </body>
 
 </html>

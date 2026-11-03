@@ -306,6 +306,17 @@
             font-size: 15px;
         }
         .modal-panel input:focus { outline: none; border-color: var(--accent); }
+        .modal-panel .celular { display: flex; align-items: center; gap: 8px; }
+        .modal-panel .celular .pais {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        .modal-panel .celular .pais svg { width: 22px; height: 15px; display: block; }
+        .modal-panel .celular input { flex: 1; min-width: 0; }
         .modal-panel input:-webkit-autofill {
             -webkit-text-fill-color: var(--text-primary);
             -webkit-box-shadow: 0 0 0 1000px var(--surface-base) inset;
@@ -378,7 +389,13 @@
                 <label for="ri-email">Correo</label>
                 <input id="ri-email" name="email" type="email" required autocomplete="email">
                 <label for="ri-phone">Celular</label>
-                <input id="ri-phone" name="phone" type="tel" inputmode="numeric" required minlength="9" maxlength="9" pattern="09[0-9]{7}" autocomplete="tel-national" placeholder="099123456">
+                <div class="celular">
+                    <span class="pais" aria-label="Uruguay, +598">
+                        <svg viewBox="0 0 27 18" aria-hidden="true"><rect width="27" height="18" fill="#fff"/><path fill="#0038A8" d="M0 2h27v2H0zM0 6h27v2H0zM0 10h27v2H0zM0 14h27v2H0z"/><rect width="13" height="10" fill="#fff"/><circle cx="6.5" cy="5" r="3.2" fill="#FCD116" stroke="#7B3F00" stroke-width=".4"/></svg>
+                        +598
+                    </span>
+                    <input id="ri-phone" name="phone" type="tel" inputmode="numeric" required maxlength="8" pattern="9[0-9]{7}" autocomplete="tel-national" placeholder="99 123 456">
+                </div>
                 <div class="modal-actions">
                     <button id="submit-waitlist-btn" type="submit" class="btn">Enviar</button>
                 </div>
@@ -505,9 +522,9 @@
                 if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') cerrar();
             });
 
-            // Solo números y hasta 9: el celular de Uruguay (09X XXX XXX).
+            // Solo números, sin el 0 de adelante y hasta 8: el celular de Uruguay después del +598.
             document.getElementById('ri-phone').addEventListener('input', function (e) {
-                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9);
+                e.target.value = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 8);
             });
 
             form.addEventListener('submit', async function (e) {
@@ -517,7 +534,7 @@
                 var phone = document.getElementById('ri-phone').value.trim();
                 if (name.length < 2) return avisar('Escribí tu nombre.', true);
                 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return avisar('Ese correo no parece válido.', true);
-                if (!/^09[0-9]{7}$/.test(phone)) return avisar('Escribí tu celular de Uruguay: 09 y 7 números más.', true);
+                if (!/^9[0-9]{7}$/.test(phone)) return avisar('Escribí tu celular de Uruguay, con 8 números.', true);
                 if (!tokenVigente()) {
                     verificar();
                     return avisar('Volvemos a verificar. Enviá de nuevo en un momento.', false);
@@ -532,7 +549,7 @@
                     var r = await fetch(API_URL + '/public/waitlist', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name, email: email, phone: '+598' + phone.slice(1), turnstileToken: tokenDelEnvio }),
+                        body: JSON.stringify({ name: name, email: email, phone: '+598' + phone, turnstileToken: tokenDelEnvio }),
                     });
                     if (!r.ok) throw new Error('status ' + r.status);
                     form.querySelectorAll('input').forEach(function (i) { i.disabled = true; });
